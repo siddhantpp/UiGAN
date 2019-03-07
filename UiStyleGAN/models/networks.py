@@ -27,7 +27,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
-
+from torchvision import datasets, transforms, models
 
 ###############################################################################
 # Helper Functions
@@ -603,6 +603,34 @@ class NLayerDiscriminator(nn.Module):
         """Standard forward."""
         return self.model(input)
 
+class ImageNetPretrained(nn.Module):
+    """Defines pretrained VGG16 model"""
+
+    def __init__(self):
+        super(ImageNetPretrained, self).__init__()
+
+    def pretrainedVGG16(gpu_ids=[]):
+        
+        model = models.vgg16(pretrained=True)
+		
+        for param in model.features.parameters():
+          param.requires_grad = False
+		  
+        
+        n_inputs = model.classifier[6].in_features
+        last_layer = nn.Linear(n_inputs, 1)
+        model.classifier[6] = last_layer
+        
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(gpu_ids[0])
+
+        model = torch.nn.DataParallel(model, device_ids=gpu_ids).cuda()
+        return model
+		
+    def forward(self, input):
+        """Standard forward."""        
+        return self.model(input)		
+		
 
 class PixelDiscriminator(nn.Module):
     """Defines a 1x1 PatchGAN discriminator (pixelGAN)"""
