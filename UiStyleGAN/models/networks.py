@@ -626,6 +626,17 @@ class ImageNetPretrained(nn.Module):
 
         model = torch.nn.DataParallel(model, device_ids=gpu_ids).cuda()
         return model
+
+    def pretrainedRes50(gpu_ids=[]):
+        
+        model = models.resnet50(pretrained=True)
+        model.fc.out_features = 1
+        
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(gpu_ids[0])
+
+        model = torch.nn.DataParallel(model, device_ids=gpu_ids).cuda()
+        return model
 		
     def forward(self, input):
         """Standard forward."""        
