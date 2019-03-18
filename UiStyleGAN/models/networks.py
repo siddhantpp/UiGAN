@@ -618,7 +618,7 @@ class ImageNetPretrained(nn.Module):
 		  
         
         n_inputs = model.classifier[6].in_features
-        last_layer = nn.Linear(n_inputs, 1)
+        last_layer = nn.Linear(n_inputs, 2)
         model.classifier[6] = last_layer
         
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -630,7 +630,7 @@ class ImageNetPretrained(nn.Module):
     def pretrainedRes50(gpu_ids=[]):
         
         model = models.resnet50(pretrained=True)
-        model.fc.out_features = 1
+        model.fc.out_features = 2
         
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model.to(gpu_ids[0])

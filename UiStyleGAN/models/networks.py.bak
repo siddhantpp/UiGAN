@@ -27,7 +27,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
-
+from torchvision import datasets, transforms, models
 
 ###############################################################################
 # Helper Functions
@@ -162,11 +162,14 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
     """
     net = None
     norm_layer = get_norm_layer(norm_type=norm)
-
-    if netG == 'resnet_9blocks':
+    if netG == 'resnet_4blocks':
+        net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=4)
+    elif netG == 'resnet_9blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=9)
     elif netG == 'resnet_6blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=6)
+    elif netG == 'resnet_12blocks':
+        net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=12)
     elif netG == 'unet_128':
         net = UnetGenerator(input_nc, output_nc, 7, ngf, norm_layer=norm_layer, use_dropout=use_dropout)
     elif netG == 'unet_256':
@@ -600,6 +603,34 @@ class NLayerDiscriminator(nn.Module):
         """Standard forward."""
         return self.model(input)
 
+class ImageNetPretrained(nn.Module):
+    """Defines pretrained VGG16 model"""
+
+    def __init__(self):
+        super(ImageNetPretrained, self).__init__()
+
+    def pretrainedVGG16(gpu_ids=[]):
+        
+        model = models.vgg16(pretrained=True)
+		
+        for param in model.features.parameters():
+          param.requires_grad = False
+		  
+        
+        n_inputs = model.classifier[6].in_features
+        last_layer = nn.Linear(n_inputs, 1)
+        model.classifier[6] = last_layer
+        
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(gpu_ids[0])
+
+        model = torch.nn.DataParallel(model, device_ids=gpu_ids).cuda()
+        return model
+		
+    def forward(self, input):
+        """Standard forward."""        
+        return self.model(input)		
+		
 
 class PixelDiscriminator(nn.Module):
     """Defines a 1x1 PatchGAN discriminator (pixelGAN)"""

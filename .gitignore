@@ -105,3 +105,4 @@ venv.bak/
 *.bak
 *.bak
 UiStyleGAN/models/networks.py.bak
+*.bak
