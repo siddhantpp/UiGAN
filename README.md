@@ -8,4 +8,4 @@ Currently our work on UiStyleGAN is in the experimental phase and  is based on [
 
 Similarly, UiCodeGAN is also experimentally based on [pix2code](https://github.com/tonybeltramelli/pix2code) and [screenshotToCode](https://github.com/emilwallner/Screenshot-to-code/tree/master/floydhub)
 
-Video explaining our work - https://www.youtube.com/watch?v=_8evyXpjULE
+
